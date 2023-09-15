@@ -68,8 +68,8 @@ func RotatePolygon(p *geo.Polygon, hashmap Hashmap) *geo.Polygon {
 			continue
 		}
 
-		p, _ := point.MarshalBinary()
-		pMinus, _ := points[index-1].MarshalBinary()
+		p := Serialize(point)
+		pMinus := Serialize(points[index-1])
 
 		if len(hashmap[string(p)]) > 1 && !sameMap(hashmap[string(p)], hashmap[string(pMinus)]) {
 
@@ -104,8 +104,8 @@ func Parition(polygon *geo.Polygon, hashmap Hashmap) []Arc {
 			continue
 		}
 
-		p, _ := point.MarshalBinary()
-		pMinus, _ := points[index-1].MarshalBinary()
+		p := Serialize(point)
+		pMinus := Serialize(points[index-1])
 
 		hp := hashmap[string(p)]
 
@@ -149,6 +149,10 @@ func Parition(polygon *geo.Polygon, hashmap Hashmap) []Arc {
 
 }
 
+func Serialize(p *geo.Point) string {
+	return fmt.Sprintf("%.2f-%.2f", p.Lat(), p.Lng())
+}
+
 func Hash(mp MultiPolygon) Hashmap {
 
 	// (point, owners)
@@ -157,7 +161,7 @@ func Hash(mp MultiPolygon) Hashmap {
 	for owner, polygon := range mp {
 		for _, point := range polygon.Points() {
 
-			p, _ := point.MarshalBinary()
+			p := Serialize(point)
 
 			if _, ok := hashmap[string(p)]; ok {
 				hashmap[string(p)][owner] = true
