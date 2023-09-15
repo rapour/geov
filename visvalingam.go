@@ -30,24 +30,6 @@ func (ap *AugmentedPoint) ComputeArea() {
 
 }
 
-func (ap *AugmentedPoint) LenNext(i int) int {
-	if ap.next == nil {
-		return i + 1
-	}
-	return ap.next.LenNext(i + 1)
-}
-
-func (ap *AugmentedPoint) LenPrevious(i int) int {
-	if ap.previous == nil {
-		return i + 1
-	}
-	return ap.previous.LenPrevious(i + 1)
-}
-
-func (ap *AugmentedPoint) Len() int {
-	return ap.LenNext(0) + ap.LenPrevious(0) - 1
-}
-
 func (ap *AugmentedPoint) Remove() {
 
 	if ap.previous == nil || ap.next == nil {
@@ -100,21 +82,21 @@ func Visvalingam(a Arc, ration float64) Arc {
 
 	for {
 
-		if origin.Len() <= 2 || float64(origin.Len())/float64(len(a.Points)) <= ration {
+		if l := heap.GetSize() + 2; l <= 2 || float64(l)/float64(len(a.Points)) <= ration {
 			break
 		}
 
 		m := heap.ExtractMin().(*AugmentedPoint)
 		m.Remove()
 
-		it := &origin
-		for {
-			if it == nil {
-				break
-			}
-			it.ComputeArea()
-			it = it.next
+		if m.next != nil {
+			m.next.ComputeArea()
 		}
+
+		if m.previous != nil {
+			m.previous.ComputeArea()
+		}
+
 	}
 
 	res := Arc{}

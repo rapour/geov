@@ -1,20 +1,46 @@
 package geov
 
 import (
-	"reflect"
+	"fmt"
 
 	geo "github.com/kellydunn/golang-geo"
 )
 
 type Arc struct {
 	Points []geo.Point
+	Owners []int
+}
+
+func (a *Arc) ID() string {
+
+	l := len(a.Points)
+
+	if l == 0 {
+		return "nil"
+	}
+
+	var sum int
+	for _, o := range a.Owners {
+		sum += o
+	}
+
+	return fmt.Sprintf("%.2f-%.2f-%d",
+		a.Points[0].Lat()+
+			a.Points[l-1].Lat(),
+		a.Points[0].Lng()+
+			a.Points[l-1].Lng(),
+		sum,
+	)
+
 }
 
 func (a *Arc) AddPoint(p geo.Point) {
 	a.Points = append(a.Points, p)
 }
 
-type Hashmap map[geo.Point]map[int]bool
+type ArcMap map[string]Arc
+
+type Hashmap map[string]map[int]bool
 
 type MultiPolygon map[int]*geo.Polygon
 
@@ -42,7 +68,10 @@ func RotatePolygon(p *geo.Polygon, hashmap Hashmap) *geo.Polygon {
 			continue
 		}
 
-		if len(hashmap[*point]) > 1 && !reflect.DeepEqual(hashmap[*point], hashmap[*points[index-1]]) {
+		p, _ := point.MarshalBinary()
+		pMinus, _ := points[index-1].MarshalBinary()
+
+		if len(hashmap[string(p)]) > 1 && !sameMap(hashmap[string(p)], hashmap[string(pMinus)]) {
 
 			// rotate the ring and break
 			var newPoints []*geo.Point
@@ -75,9 +104,14 @@ func Parition(polygon *geo.Polygon, hashmap Hashmap) []Arc {
 			continue
 		}
 
-		if !reflect.DeepEqual(hashmap[*point], hashmap[*points[index-1]]) {
+		p, _ := point.MarshalBinary()
+		pMinus, _ := points[index-1].MarshalBinary()
 
-			if len(hashmap[*point]) > 1 {
+		hp := hashmap[string(p)]
+
+		if !sameMap(hp, hashmap[string(pMinus)]) {
+
+			if len(hp) > 1 {
 
 				currentArc.AddPoint(*point)
 				arcs = append(arcs, currentArc)
@@ -98,6 +132,12 @@ func Parition(polygon *geo.Polygon, hashmap Hashmap) []Arc {
 
 		currentArc.AddPoint(*point)
 
+		if len(currentArc.Owners) == 0 {
+			for owner := range hp {
+				currentArc.Owners = append(currentArc.Owners, owner)
+			}
+		}
+
 		if index == len(points)-1 {
 			currentArc.AddPoint(*points[0])
 			arcs = append(arcs, currentArc)
@@ -117,12 +157,14 @@ func Hash(mp MultiPolygon) Hashmap {
 	for owner, polygon := range mp {
 		for _, point := range polygon.Points() {
 
-			if _, ok := hashmap[*point]; ok {
-				hashmap[*point][owner] = true
+			p, _ := point.MarshalBinary()
+
+			if _, ok := hashmap[string(p)]; ok {
+				hashmap[string(p)][owner] = true
 				continue
 			}
 
-			hashmap[*point] = map[int]bool{owner: true}
+			hashmap[string(p)] = map[int]bool{owner: true}
 
 		}
 	}
@@ -136,6 +178,7 @@ func Simplify(mp MultiPolygon, s Simplifier, ratio float64) MultiPolygon {
 
 	hashmap := Hash(mp)
 
+	//arcMap := make(ArcMap)
 	for owner, polygon := range mp {
 
 		simplifiedPolygon := geo.NewPolygon(nil)
@@ -143,7 +186,16 @@ func Simplify(mp MultiPolygon, s Simplifier, ratio float64) MultiPolygon {
 		arcs := Parition(polygon, hashmap)
 
 		for _, arc := range arcs {
+
+			// var simplifiedArc Arc
+			// if sarc, ok := arcMap[arc.ID()]; ok {
+			// 	simplifiedArc = sarc
+			// } else {
+			// 	simplifiedArc = s(arc, ratio)
+			// 	arcMap[arc.ID()] = simplifiedArc
+			// }
 			simplifiedArc := s(arc, ratio)
+
 			for index, p := range simplifiedArc.Points {
 				if index < len(simplifiedArc.Points)-1 {
 					tmp := p

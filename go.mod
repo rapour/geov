@@ -6,6 +6,7 @@ require (
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
 	github.com/kellydunn/golang-geo v0.7.0
 	github.com/paulmach/go.geojson v1.5.0
+	github.com/pkg/profile v1.7.0
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
@@ -14,6 +15,8 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
+	github.com/felixge/fgprof v0.9.3 // indirect
+	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kylelemons/go-gypsy v1.0.0 // indirect
 	github.com/lib/pq v1.10.9 // indirect

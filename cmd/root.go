@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
+	"github.com/pkg/profile"
 	"github.com/rapour/geov"
 	"github.com/spf13/cobra"
 )
@@ -27,6 +29,8 @@ var rootCmd = &cobra.Command{
 	Use: "map",
 	Run: func(cmd *cobra.Command, args []string) {
 
+		defer profile.Start(profile.MemProfile, profile.ProfilePath("."), profile.NoShutdownHook).Stop()
+
 		bin, err := os.ReadFile(in)
 		if err != nil {
 			log.Fatal(err)
@@ -42,7 +46,10 @@ var rootCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		t := time.Now()
 		smp := geov.Simplify(mp, geov.Visvalingam, ratio)
+
+		fmt.Printf("processing time %f\n", time.Since(t).Seconds())
 
 		for owner, p := range smp {
 			if !p.IsClosed() {

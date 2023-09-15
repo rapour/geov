@@ -82,12 +82,18 @@ func TestRotatePolygon(t *testing.T) {
 		geo.NewPoint(1, 0),
 	})
 
-	hashmap := Hashmap{
+	tmp := map[geo.Point]map[int]bool{
 		*geo.NewPoint(0, 0): {1: true},
 		*geo.NewPoint(1, 0): {1: true},
 		*geo.NewPoint(2, 2): {1: true, 2: true},
 		*geo.NewPoint(1, 2): {1: true, 2: true},
 		*geo.NewPoint(0, 2): {1: true, 2: true},
+	}
+
+	hashmap := make(Hashmap)
+	for p, t := range tmp {
+		b, _ := p.MarshalBinary()
+		hashmap[string(b)] = t
 	}
 
 	rp := RotatePolygon(p, hashmap)
@@ -100,7 +106,7 @@ func TestRotatePolygon(t *testing.T) {
 
 func TestHashmap(t *testing.T) {
 
-	expectedHashmap := Hashmap{
+	tmp := map[geo.Point]map[int]bool{
 		*geo.NewPoint(0, 0): {1: true},
 		*geo.NewPoint(1, 0): {1: true},
 		*geo.NewPoint(2, 2): {1: true, 2: true},
@@ -108,6 +114,12 @@ func TestHashmap(t *testing.T) {
 		*geo.NewPoint(0, 2): {1: true, 2: true},
 		*geo.NewPoint(1, 3): {2: true},
 		*geo.NewPoint(0, 4): {2: true},
+	}
+
+	expectedHashmap := make(Hashmap)
+	for p, t := range tmp {
+		b, _ := p.MarshalBinary()
+		expectedHashmap[string(b)] = t
 	}
 
 	mp := InitMultiPolygon()
@@ -136,24 +148,24 @@ func TestSimplify(t *testing.T) {
 	smp := Simplify(mp, func(p Arc, ration float64) Arc { return p }, 1)
 
 	for key, p := range mp {
-		require.Equal(t, true, sameSlice(p.Points(), smp[key].Points()))
+		require.Equal(t, true, samePointPointerSlice(p.Points(), smp[key].Points()))
 	}
 
 	smp2 := Simplify(mp, Visvalingam, 1)
 	for key, p := range mp {
-		require.Equal(t, true, sameSlice(p.Points(), smp2[key].Points()))
+		require.Equal(t, true, samePointPointerSlice(p.Points(), smp2[key].Points()))
 	}
 
 	smp3 := Simplify(mp, Visvalingam, 0.75)
 	exsmp3 := InitSimplified06()
 
 	for key, p := range exsmp3 {
-		require.Equal(t, true, sameSlice(p.Points(), smp3[key].Points()))
+		require.Equal(t, true, samePointPointerSlice(p.Points(), smp3[key].Points()))
 	}
 
 }
 
-func sameSlice(x, y []*geo.Point) bool {
+func samePointPointerSlice(x, y []*geo.Point) bool {
 	if len(x) != len(y) {
 		return false
 	}
