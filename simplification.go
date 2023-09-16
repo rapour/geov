@@ -66,7 +66,10 @@ func RotatePolygon(p *geo.Polygon, hashmap Hashmap) *geo.Polygon {
 		p := Serialize(point)
 		pMinus := Serialize(points[index-1])
 
-		if len(hashmap[string(p)]) > 1 && !sameMap(hashmap[string(p)], hashmap[string(pMinus)]) {
+		hp := hashmap[string(p)]
+		hpm := hashmap[string(pMinus)]
+
+		if subsetMap(hp, hpm) && !sameMap(hp, hpm) {
 
 			// rotate the ring and break
 			var newPoints []*geo.Point
