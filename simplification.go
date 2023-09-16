@@ -19,17 +19,12 @@ func (a *Arc) ID() string {
 		return "nil"
 	}
 
-	var sum int
-	for _, o := range a.Owners {
-		sum += o
-	}
-
-	return fmt.Sprintf("%.2f-%.2f-%d",
+	return fmt.Sprintf("%.2f-%.2f-%v",
 		a.Points[0].Lat()+
 			a.Points[l-1].Lat(),
 		a.Points[0].Lng()+
 			a.Points[l-1].Lng(),
-		sum,
+		a.Owners,
 	)
 
 }
@@ -98,6 +93,7 @@ func Parition(polygon *geo.Polygon, hashmap Hashmap) []Arc {
 
 	currentArc := Arc{}
 	currentArc.AddPoint(*points[0])
+
 	for index, point := range points {
 
 		if index == 0 {
@@ -108,10 +104,11 @@ func Parition(polygon *geo.Polygon, hashmap Hashmap) []Arc {
 		pMinus := Serialize(points[index-1])
 
 		hp := hashmap[string(p)]
+		hpm := hashmap[string(pMinus)]
 
-		if !sameMap(hp, hashmap[string(pMinus)]) {
+		if !sameMap(hp, hpm) {
 
-			if len(hp) > 1 {
+			if subsetMap(hp, hpm) {
 
 				currentArc.AddPoint(*point)
 				arcs = append(arcs, currentArc)

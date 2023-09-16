@@ -92,8 +92,7 @@ func TestRotatePolygon(t *testing.T) {
 
 	hashmap := make(Hashmap)
 	for p, t := range tmp {
-		b, _ := p.MarshalBinary()
-		hashmap[string(b)] = t
+		hashmap[Serialize(&p)] = t
 	}
 
 	rp := RotatePolygon(p, hashmap)
@@ -118,8 +117,7 @@ func TestHashmap(t *testing.T) {
 
 	expectedHashmap := make(Hashmap)
 	for p, t := range tmp {
-		b, _ := p.MarshalBinary()
-		expectedHashmap[string(b)] = t
+		expectedHashmap[Serialize(&p)] = t
 	}
 
 	mp := InitMultiPolygon()

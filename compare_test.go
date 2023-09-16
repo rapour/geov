@@ -41,3 +41,39 @@ func TestSameMap(t *testing.T) {
 	}
 
 }
+
+func TestSubsetMap(t *testing.T) {
+
+	cases := []struct {
+		testname string
+		set      map[int]bool
+		subset   map[int]bool
+		isSubset bool
+	}{
+		{
+			testname: "subset-strict",
+			set:      map[int]bool{1: true, 2: true},
+			subset:   map[int]bool{1: true, 2: true},
+			isSubset: true,
+		},
+		{
+			testname: "not-subset",
+			set:      map[int]bool{1: true, 2: true},
+			subset:   map[int]bool{1: true, 2: true, 3: true},
+			isSubset: false,
+		},
+		{
+			testname: "subset",
+			set:      map[int]bool{1: true, 2: true, 3: true},
+			subset:   map[int]bool{1: true, 2: true},
+			isSubset: true,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.testname, func(t *testing.T) {
+			require.Equal(t, tc.isSubset, subsetMap(tc.set, tc.subset))
+		})
+	}
+
+}

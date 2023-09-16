@@ -29,7 +29,7 @@ var rootCmd = &cobra.Command{
 	Use: "map",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		defer profile.Start(profile.MemProfile, profile.ProfilePath("."), profile.NoShutdownHook).Stop()
+		defer profile.Start(profile.CPUProfile, profile.ProfilePath("."), profile.NoShutdownHook).Stop()
 
 		bin, err := os.ReadFile(in)
 		if err != nil {
