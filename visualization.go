@@ -2,7 +2,9 @@ package geov
 
 import (
 	"errors"
+	"fmt"
 	"io"
+	"math/rand"
 
 	svg "github.com/ajstarks/svgo"
 	geo "github.com/kellydunn/golang-geo"
@@ -102,6 +104,14 @@ func Scale(in *geo.Point, bbox *BoundingBox) (*geo.Point, error) {
 
 }
 
+var colors []string = []string{"blue", "green", "black", "red", "purple"}
+
+func getRandomColors() (string, string) {
+	c := rand.Intn(len(colors))
+
+	return fmt.Sprintf("fill=\"%s\"", colors[c]), fmt.Sprintf("stroke=\"%s\"", colors[c])
+}
+
 func (mp MultiPolygon) SVG(w io.Writer) error {
 
 	box := mp.BBox()
@@ -114,16 +124,23 @@ func (mp MultiPolygon) SVG(w io.Writer) error {
 
 	for _, polygon := range mp {
 
+		f, s := getRandomColors()
+
 		points := polygon.Points()
 		for index := 0; index < len(points); index++ {
-
-			if index == 0 {
-				continue
-			}
 
 			head, err := Scale(points[index], box)
 			if err != nil {
 				return err
+			}
+
+			canvas.Circle(int(head.Lat()), int(head.Lng()), 1,
+				f,
+				"stroke-width=\"0.1\"",
+			)
+
+			if index == 0 {
+				continue
 			}
 
 			tail, err := Scale(points[index-1], box)
@@ -132,12 +149,7 @@ func (mp MultiPolygon) SVG(w io.Writer) error {
 			}
 
 			canvas.Circle(int(head.Lat()), int(head.Lng()), 1,
-				"fill=\"blue\"",
-				"stroke-width=\"0.1\"",
-			)
-
-			canvas.Circle(int(tail.Lat()), int(tail.Lng()), 1,
-				"fill=\"blue\"",
+				f,
 				"stroke-width=\"0.1\"",
 			)
 
@@ -145,7 +157,7 @@ func (mp MultiPolygon) SVG(w io.Writer) error {
 				int(head.Lat()), int(head.Lng()),
 				int(tail.Lat()), int(tail.Lng()),
 				"stroke-width=\"0.5\"",
-				"stroke=\"blue\"",
+				s,
 			)
 
 			if index == len(points)-1 {
@@ -158,7 +170,7 @@ func (mp MultiPolygon) SVG(w io.Writer) error {
 					int(head.Lat()), int(head.Lng()),
 					int(tail.Lat()), int(tail.Lng()),
 					"stroke-width=\"0.5\"",
-					"stroke=\"blue\"",
+					s,
 				)
 			}
 

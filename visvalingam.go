@@ -60,7 +60,7 @@ func (ap *AugmentedPoint) AddNext(p *geo.Point) *AugmentedPoint {
 	return ap.next.AddNext(p)
 }
 
-func Visvalingam(a Arc, ration float64) Arc {
+func Visvalingam(a Arc, ratio float64) Arc {
 
 	origin := AugmentedPoint{}
 
@@ -82,7 +82,7 @@ func Visvalingam(a Arc, ration float64) Arc {
 
 	for {
 
-		if l := heap.GetSize() + 2; l <= 2 || float64(l)/float64(len(a.Points)) <= ration {
+		if l := heap.GetSize() + 2; l <= 2 || float64(l)/float64(len(a.Points)) <= ratio {
 			break
 		}
 

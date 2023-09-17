@@ -51,12 +51,6 @@ var rootCmd = &cobra.Command{
 
 		fmt.Printf("processing time %f\n", time.Since(t).Seconds())
 
-		for owner, p := range smp {
-			if !p.IsClosed() {
-				fmt.Printf("%d not closed\n", owner)
-			}
-		}
-
 		err = smp.SVG(out)
 		if err != nil {
 			log.Fatal(err)

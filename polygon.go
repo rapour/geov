@@ -42,9 +42,13 @@ func OverPassTurboGeoJsonParser(data []byte) (MultiPolygon, error) {
 					continue
 				}
 
-				for _, point := range points {
+				for index, point := range points {
 
 					if len(point) != 2 {
+						continue
+					}
+
+					if index == len(points)-1 {
 						continue
 					}
 

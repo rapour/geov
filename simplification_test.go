@@ -134,7 +134,6 @@ func TestPartition(t *testing.T) {
 	hashmap := Hash(mp)
 
 	arcs := Parition(mp[1], hashmap)
-
 	require.Equal(t, 2, len(arcs))
 
 }
