@@ -104,7 +104,7 @@ func Scale(in *geo.Point, bbox *BoundingBox) (*geo.Point, error) {
 
 }
 
-var colors []string = []string{"blue", "green", "black", "red", "purple"}
+var colors []string = []string{"blue", "green", "black", "red", "purple", "brown"}
 
 func getRandomColors() (string, string) {
 	c := rand.Intn(len(colors))

@@ -14,7 +14,59 @@ func (a *Arc) AddPoint(p geo.Point) {
 	a.Points = append(a.Points, p)
 }
 
-type Hashmap map[string]map[int]bool
+type Hashmap map[string]map[string]bool
+
+func Hash(mp MultiPolygon) Hashmap {
+
+	// (point, neighbors)
+	hashmap := make(Hashmap)
+
+	for _, polygon := range mp {
+
+		points := polygon.Points()
+		l := len(points)
+
+		// polygon of less than 3 points in 2d plane is ignored
+		if l < 3 {
+			continue
+		}
+
+		for index, point := range points {
+
+			var prev *geo.Point
+			var next *geo.Point
+
+			switch index {
+			case 0:
+				prev = points[l-1]
+				next = points[1]
+
+			case l - 1:
+				prev = points[index-1]
+				next = points[0]
+
+			default:
+				prev = points[index-1]
+				next = points[index+1]
+			}
+
+			p := Serialize(point)
+
+			if _, ok := hashmap[p]; ok {
+
+				hashmap[p][Serialize(prev)] = true
+				hashmap[p][Serialize(next)] = true
+
+				continue
+			}
+
+			hashmap[p] = map[string]bool{Serialize(prev): true, Serialize(next): true}
+
+		}
+	}
+
+	return hashmap
+}
 
 type MultiPolygon map[int]*geo.Polygon
 
@@ -30,7 +82,7 @@ func (mp MultiPolygon) BBox() *BoundingBox {
 	return &bb
 }
 
-type Simplifier func(p Arc, ration float64) Arc
+type Simplifier func(p Arc, ratio float64) Arc
 
 func RotatePolygon(p *geo.Polygon, hashmap Hashmap) *geo.Polygon {
 
@@ -40,26 +92,9 @@ func RotatePolygon(p *geo.Polygon, hashmap Hashmap) *geo.Polygon {
 
 		p := Serialize(point)
 
-		var pPlus string
-		if index == len(points)-1 {
-			pPlus = Serialize(points[0])
-		} else {
-			pPlus = Serialize(points[(index + 1)])
-		}
+		hp := hashmap[p]
 
-		var pMinus string
-		if index == 0 {
-			pMinus = Serialize(points[len(points)-1])
-		} else {
-			pMinus = Serialize(points[(index - 1)])
-
-		}
-
-		hp := hashmap[string(p)]
-		hpm := hashmap[string(pMinus)]
-		hpp := hashmap[string(pPlus)]
-
-		if !subsetMap(hpm, hp) || !subsetMap(hpp, hp) {
+		if len(hp) > 2 {
 			// rotate the ring and break
 			var newPoints []*geo.Point
 			newPoints = append(newPoints, points[index:]...)
@@ -92,27 +127,9 @@ func Parition(polygon *geo.Polygon, hashmap Hashmap) []Arc {
 
 		p := Serialize(point)
 
-		var pPlus string
-		if index == len(points)-1 {
-			pPlus = Serialize(points[0])
-		} else {
-			pPlus = Serialize(points[(index + 1)])
-		}
+		hp := hashmap[p]
 
-		var pMinus string
-		if index == 0 {
-			pMinus = Serialize(points[len(points)-1])
-		} else {
-			pMinus = Serialize(points[(index - 1)])
-
-		}
-
-		hp := hashmap[string(p)]
-		hpm := hashmap[string(pMinus)]
-		hpp := hashmap[string(pPlus)]
-
-		if !subsetMap(hpm, hp) || !subsetMap(hpp, hp) {
-
+		if len(hp) > 2 {
 			currentArc.AddPoint(*point)
 			arcs = append(arcs, currentArc)
 
@@ -134,30 +151,7 @@ func Parition(polygon *geo.Polygon, hashmap Hashmap) []Arc {
 }
 
 func Serialize(p *geo.Point) string {
-	return fmt.Sprintf("%.2f-%.2f", p.Lat(), p.Lng())
-}
-
-func Hash(mp MultiPolygon) Hashmap {
-
-	// (point, owners)
-	hashmap := make(Hashmap)
-
-	for owner, polygon := range mp {
-		for _, point := range polygon.Points() {
-
-			p := Serialize(point)
-
-			if _, ok := hashmap[string(p)]; ok {
-				hashmap[string(p)][owner] = true
-				continue
-			}
-
-			hashmap[string(p)] = map[int]bool{owner: true}
-
-		}
-	}
-
-	return hashmap
+	return fmt.Sprintf("%0.8f-%0.8f", p.Lat(), p.Lng())
 }
 
 func Simplify(mp MultiPolygon, s Simplifier, ratio float64) MultiPolygon {

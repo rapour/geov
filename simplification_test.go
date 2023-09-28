@@ -66,13 +66,11 @@ func InitSimplified06() MultiPolygon {
 
 func TestRotatePolygon(t *testing.T) {
 
-	p := geo.NewPolygon([]*geo.Point{
-		geo.NewPoint(0, 0),
-		geo.NewPoint(1, 0),
-		geo.NewPoint(2, 2),
-		geo.NewPoint(1, 2),
-		geo.NewPoint(0, 2),
-	})
+	mp := InitMultiPolygon()
+
+	hashMap := Hash(mp)
+
+	p := RotatePolygon(mp[1], hashMap)
 
 	expectedP := geo.NewPolygon([]*geo.Point{
 		geo.NewPoint(2, 2),
@@ -82,49 +80,46 @@ func TestRotatePolygon(t *testing.T) {
 		geo.NewPoint(1, 0),
 	})
 
-	tmp := map[geo.Point]map[int]bool{
-		*geo.NewPoint(0, 0): {1: true},
-		*geo.NewPoint(1, 0): {1: true},
-		*geo.NewPoint(2, 2): {1: true, 2: true},
-		*geo.NewPoint(1, 2): {1: true, 2: true},
-		*geo.NewPoint(0, 2): {1: true, 2: true},
-	}
-
-	hashmap := make(Hashmap)
-	for p, t := range tmp {
-		hashmap[Serialize(&p)] = t
-	}
-
-	rp := RotatePolygon(p, hashmap)
-
-	for index, p := range rp.Points() {
-		require.Equal(t, expectedP.Points()[index], p)
-	}
-
+	require.Equal(t, true, samePointPointerSlice(p.Points(), expectedP.Points()))
 }
 
 func TestHashmap(t *testing.T) {
 
-	tmp := map[geo.Point]map[int]bool{
-		*geo.NewPoint(0, 0): {1: true},
-		*geo.NewPoint(1, 0): {1: true},
-		*geo.NewPoint(2, 2): {1: true, 2: true},
-		*geo.NewPoint(1, 2): {1: true, 2: true},
-		*geo.NewPoint(0, 2): {1: true, 2: true},
-		*geo.NewPoint(1, 3): {2: true},
-		*geo.NewPoint(0, 4): {2: true},
-	}
-
-	expectedHashmap := make(Hashmap)
-	for p, t := range tmp {
-		expectedHashmap[Serialize(&p)] = t
-	}
-
 	mp := InitMultiPolygon()
 
-	hashmap := Hash(mp)
+	hashMap := Hash(mp)
 
-	require.Equal(t, expectedHashmap, hashmap)
+	cases := []struct {
+		testname       string
+		point          *geo.Point
+		ExpectedLength int
+	}{
+		{
+			testname:       "mutual-3-neighbors",
+			point:          geo.NewPoint(0, 2),
+			ExpectedLength: 3,
+		},
+		{
+			testname:       "mutual-2-neighbors",
+			point:          geo.NewPoint(1, 2),
+			ExpectedLength: 2,
+		},
+		{
+			testname:       "non-mutual-2-neighbors",
+			point:          geo.NewPoint(1, 3),
+			ExpectedLength: 2,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.testname, func(t *testing.T) {
+
+			neighbors, ok := hashMap[Serialize(tc.point)]
+			require.Equal(t, true, ok)
+			require.Equal(t, tc.ExpectedLength, len(neighbors))
+
+		})
+	}
 }
 
 func TestPartition(t *testing.T) {
