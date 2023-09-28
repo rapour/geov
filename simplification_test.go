@@ -68,7 +68,7 @@ func TestRotatePolygon(t *testing.T) {
 
 	mp := InitMultiPolygon()
 
-	hashMap := Hash(mp)
+	hashMap := mp.Map()
 
 	p := RotatePolygon(mp[1], hashMap)
 
@@ -87,7 +87,7 @@ func TestHashmap(t *testing.T) {
 
 	mp := InitMultiPolygon()
 
-	hashMap := Hash(mp)
+	hashMap := mp.Map()
 
 	cases := []struct {
 		testname       string
@@ -126,7 +126,7 @@ func TestPartition(t *testing.T) {
 
 	mp := InitMultiPolygon()
 
-	hashmap := Hash(mp)
+	hashmap := mp.Map()
 
 	arcs := Parition(mp[1], hashmap)
 	require.Equal(t, 2, len(arcs))
