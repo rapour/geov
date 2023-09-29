@@ -19,11 +19,21 @@ var (
 	ErrPolygonKeyNotFound    = errors.New("there is no registered city for provided polygon identifier")
 )
 
+func NewMultiPolygon(ps []*geo.Polygon) MultiPolygon {
+	mp := make(MultiPolygon)
+
+	for index, p := range ps {
+		mp[index] = p
+	}
+
+	return mp
+}
+
 type MultiPolygon map[int]*geo.Polygon
 
-func (mp MultiPolygon) BBox() *BoundingBox {
+func (mp MultiPolygon) BBox() *boundingBox {
 
-	var bb BoundingBox
+	var bb boundingBox
 	for _, polygon := range mp {
 		for _, p := range polygon.Points() {
 			bb.Expand(p)
@@ -81,7 +91,7 @@ func (a *Arc) AddPoint(p geo.Point) {
 	a.Points = append(a.Points, p)
 }
 
-func Serialize(p *geo.Point) string {
+func serialize(p *geo.Point) string {
 	return fmt.Sprintf("%0.8f-%0.8f", p.Lat(), p.Lng())
 }
 
@@ -121,17 +131,17 @@ func (mp MultiPolygon) Map() Hashmap {
 				next = points[index+1]
 			}
 
-			p := Serialize(point)
+			p := serialize(point)
 
 			if _, ok := hashmap[p]; ok {
 
-				hashmap[p][Serialize(prev)] = true
-				hashmap[p][Serialize(next)] = true
+				hashmap[p][serialize(prev)] = true
+				hashmap[p][serialize(next)] = true
 
 				continue
 			}
 
-			hashmap[p] = map[string]bool{Serialize(prev): true, Serialize(next): true}
+			hashmap[p] = map[string]bool{serialize(prev): true, serialize(next): true}
 
 		}
 	}
@@ -139,7 +149,7 @@ func (mp MultiPolygon) Map() Hashmap {
 	return hashmap
 }
 
-func OverPassTurboGeoJsonParser(data []byte) (MultiPolygon, error) {
+func Unmarshal(data []byte) (MultiPolygon, error) {
 
 	pm := make(MultiPolygon)
 

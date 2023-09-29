@@ -7,15 +7,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestOverPassTurboGeoJsonParser(t *testing.T) {
+func TestUnmarshal(t *testing.T) {
 
 	b, err := os.ReadFile("./testdata/export.geojson")
 	require.NoError(t, err)
 
-	_, err = OverPassTurboGeoJsonParser(b)
+	_, err = Unmarshal(b)
 	require.NoError(t, err)
 
-	_, err = OverPassTurboGeoJsonParser(nil)
+	_, err = Unmarshal(nil)
 	require.Error(t, err)
 
 }

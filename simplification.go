@@ -1,20 +1,18 @@
 package geov
 
 import (
-	"fmt"
-
 	geo "github.com/kellydunn/golang-geo"
 )
 
 type Simplifier func(p Arc, ratio float64) Arc
 
-func RotatePolygon(p *geo.Polygon, hashmap Hashmap) *geo.Polygon {
+func rotatePolygon(p *geo.Polygon, hashmap Hashmap) *geo.Polygon {
 
 	points := p.Points()
 
 	for index, point := range points {
 
-		p := Serialize(point)
+		p := serialize(point)
 
 		hp := hashmap[p]
 
@@ -32,10 +30,10 @@ func RotatePolygon(p *geo.Polygon, hashmap Hashmap) *geo.Polygon {
 	return geo.NewPolygon(points)
 }
 
-func Parition(polygon *geo.Polygon, hashmap Hashmap) []Arc {
+func parition(polygon *geo.Polygon, hashmap Hashmap) []Arc {
 
 	var arcs []Arc
-	rotatedP := RotatePolygon(polygon, hashmap)
+	rotatedP := rotatePolygon(polygon, hashmap)
 	points := rotatedP.Points()
 
 	if len(points) == 0 {
@@ -49,12 +47,11 @@ func Parition(polygon *geo.Polygon, hashmap Hashmap) []Arc {
 			continue
 		}
 
-		p := Serialize(point)
+		p := serialize(point)
 
 		hp := hashmap[p]
 
 		if len(hp) > 2 {
-			fmt.Printf("%+v-%+v\n", p, hp)
 			currentArc.AddPoint(*point)
 			arcs = append(arcs, currentArc)
 
@@ -86,7 +83,7 @@ func Simplify(mp MultiPolygon, s Simplifier, ratio float64) MultiPolygon {
 
 		simplifiedPolygon := geo.NewPolygon(nil)
 
-		arcs := Parition(polygon, hashmap)
+		arcs := parition(polygon, hashmap)
 		for _, arc := range arcs {
 
 			var simplifiedArc Arc

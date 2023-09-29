@@ -6,14 +6,14 @@ import (
 	geo "github.com/kellydunn/golang-geo"
 )
 
-type AugmentedPoint struct {
+type augmentedPoint struct {
 	area     float64
 	point    *geo.Point
-	next     *AugmentedPoint
-	previous *AugmentedPoint
+	next     *augmentedPoint
+	previous *augmentedPoint
 }
 
-func (ap *AugmentedPoint) ComputeArea() {
+func (ap *augmentedPoint) computeArea() {
 
 	if ap == nil || ap.previous == nil || ap.next == nil {
 		return
@@ -30,7 +30,7 @@ func (ap *AugmentedPoint) ComputeArea() {
 
 }
 
-func (ap *AugmentedPoint) Remove() {
+func (ap *augmentedPoint) remove() {
 
 	if ap.previous == nil || ap.next == nil {
 		return
@@ -41,11 +41,11 @@ func (ap *AugmentedPoint) Remove() {
 
 }
 
-func (ap AugmentedPoint) Value() float64 {
+func (ap augmentedPoint) Value() float64 {
 	return ap.area
 }
 
-func (ap *AugmentedPoint) AddNext(p *geo.Point) *AugmentedPoint {
+func (ap *augmentedPoint) addNext(p *geo.Point) *augmentedPoint {
 
 	if ap.point == nil {
 		ap.point = p
@@ -53,22 +53,22 @@ func (ap *AugmentedPoint) AddNext(p *geo.Point) *AugmentedPoint {
 	}
 
 	if ap.next == nil {
-		ap.next = &AugmentedPoint{point: p, previous: ap}
+		ap.next = &augmentedPoint{point: p, previous: ap}
 		return ap.next
 	}
 
-	return ap.next.AddNext(p)
+	return ap.next.addNext(p)
 }
 
 func Visvalingam(a Arc, ratio float64) Arc {
 
-	origin := AugmentedPoint{}
+	origin := augmentedPoint{}
 
 	heap := NewHeap[float64](nil)
 
 	for _, p := range a.Points {
 		tmp := p
-		heap.Add(origin.AddNext(&tmp))
+		heap.Add(origin.addNext(&tmp))
 	}
 
 	it := &origin
@@ -76,7 +76,7 @@ func Visvalingam(a Arc, ratio float64) Arc {
 		if it == nil {
 			break
 		}
-		it.ComputeArea()
+		it.computeArea()
 		it = it.next
 	}
 
@@ -86,15 +86,15 @@ func Visvalingam(a Arc, ratio float64) Arc {
 			break
 		}
 
-		m := heap.ExtractMin().(*AugmentedPoint)
-		m.Remove()
+		m := heap.ExtractMin().(*augmentedPoint)
+		m.remove()
 
 		if m.next != nil {
-			m.next.ComputeArea()
+			m.next.computeArea()
 		}
 
 		if m.previous != nil {
-			m.previous.ComputeArea()
+			m.previous.computeArea()
 		}
 
 	}

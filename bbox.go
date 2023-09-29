@@ -2,68 +2,68 @@ package geov
 
 import geo "github.com/kellydunn/golang-geo"
 
-type BoundingBox struct {
-	MinLat *float64
-	MinLon *float64
-	MaxLat *float64
-	MaxLon *float64
+type boundingBox struct {
+	minLat *float64
+	minLon *float64
+	maxLat *float64
+	maxLon *float64
 }
 
-func (bb *BoundingBox) UpperPoint() (float64, float64, error) {
+func (bb *boundingBox) UpperPoint() (float64, float64, error) {
 
-	if bb.MaxLat == nil || bb.MaxLon == nil {
+	if bb.maxLat == nil || bb.maxLon == nil {
 		return 0, 0, ErrInvalidBoundingBox
 	}
 
-	return *bb.MaxLat, *bb.MaxLon, nil
+	return *bb.maxLat, *bb.maxLon, nil
 }
 
-func (bb *BoundingBox) LowerPoint() (float64, float64, error) {
+func (bb *boundingBox) LowerPoint() (float64, float64, error) {
 
-	if bb.MinLat == nil || bb.MinLon == nil {
+	if bb.minLat == nil || bb.minLon == nil {
 		return 0, 0, ErrInvalidBoundingBox
 	}
 
-	return *bb.MinLat, *bb.MinLon, nil
+	return *bb.minLat, *bb.minLon, nil
 }
 
-func (bb *BoundingBox) Expand(p *geo.Point) {
+func (bb *boundingBox) Expand(p *geo.Point) {
 
-	if bb.MinLat == nil || p.Lat() < *bb.MinLat {
+	if bb.minLat == nil || p.Lat() < *bb.minLat {
 		tmp := p.Lat()
-		bb.MinLat = &tmp
+		bb.minLat = &tmp
 	}
 
-	if bb.MaxLat == nil || p.Lat() > *bb.MaxLat {
+	if bb.maxLat == nil || p.Lat() > *bb.maxLat {
 		tmp := p.Lat()
-		bb.MaxLat = &tmp
+		bb.maxLat = &tmp
 	}
 
-	if bb.MinLon == nil || p.Lng() < *bb.MinLon {
+	if bb.minLon == nil || p.Lng() < *bb.minLon {
 		tmp := p.Lng()
-		bb.MinLon = &tmp
+		bb.minLon = &tmp
 	}
 
-	if bb.MaxLon == nil || p.Lng() > *bb.MaxLon {
+	if bb.maxLon == nil || p.Lng() > *bb.maxLon {
 		tmp := p.Lng()
-		bb.MaxLon = &tmp
+		bb.maxLon = &tmp
 	}
 }
 
-func (bb *BoundingBox) LatRange() float64 {
+func (bb *boundingBox) LatRange() float64 {
 
-	if bb.MaxLat == nil || bb.MinLat == nil {
+	if bb.maxLat == nil || bb.minLat == nil {
 		return 0
 	}
 
-	return *bb.MaxLat - *bb.MinLat
+	return *bb.maxLat - *bb.minLat
 }
 
-func (bb *BoundingBox) LonRange() float64 {
+func (bb *boundingBox) LonRange() float64 {
 
-	if bb.MaxLon == nil || bb.MinLon == nil {
+	if bb.maxLon == nil || bb.minLon == nil {
 		return 0
 	}
 
-	return *bb.MaxLon - *bb.MinLon
+	return *bb.maxLon - *bb.minLon
 }

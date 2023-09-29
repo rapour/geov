@@ -70,7 +70,7 @@ func TestRotatePolygon(t *testing.T) {
 
 	hashMap := mp.Map()
 
-	p := RotatePolygon(mp[1], hashMap)
+	p := rotatePolygon(mp[1], hashMap)
 
 	expectedP := geo.NewPolygon([]*geo.Point{
 		geo.NewPoint(2, 2),
@@ -114,7 +114,7 @@ func TestHashmap(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.testname, func(t *testing.T) {
 
-			neighbors, ok := hashMap[Serialize(tc.point)]
+			neighbors, ok := hashMap[serialize(tc.point)]
 			require.Equal(t, true, ok)
 			require.Equal(t, tc.ExpectedLength, len(neighbors))
 
@@ -128,7 +128,7 @@ func TestPartition(t *testing.T) {
 
 	hashmap := mp.Map()
 
-	arcs := Parition(mp[1], hashmap)
+	arcs := parition(mp[1], hashmap)
 	require.Equal(t, 2, len(arcs))
 
 }

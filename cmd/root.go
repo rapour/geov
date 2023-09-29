@@ -41,7 +41,7 @@ var rootCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		mp, err := geov.OverPassTurboGeoJsonParser(bin)
+		mp, err := geov.Unmarshal(bin)
 		if err != nil {
 			log.Fatal(err)
 		}

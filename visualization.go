@@ -15,7 +15,7 @@ var (
 	ErrInvalidBoundingBox = errors.New("invalid bounding box")
 )
 
-func Scale(in *geo.Point, bbox *BoundingBox) (*geo.Point, error) {
+func Scale(in *geo.Point, bbox *boundingBox) (*geo.Point, error) {
 
 	if in == nil {
 		return nil, ErrInvalidPoint

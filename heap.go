@@ -4,26 +4,26 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-func NewHeap[T constraints.Ordered](arr []Element[T]) Heap[T] {
-	return Heap[T]{array: arr}
+func NewHeap[T constraints.Ordered](arr []Element[T]) heap[T] {
+	return heap[T]{array: arr}
 }
 
 type Element[T constraints.Ordered] interface {
 	Value() T
 }
 
-type Heap[T constraints.Ordered] struct {
+type heap[T constraints.Ordered] struct {
 	array []Element[T]
 }
 
-func (h *Heap[T]) Add(e Element[T]) {
+func (h *heap[T]) Add(e Element[T]) {
 	h.array = append([]Element[T]{e}, h.array...)
 	h.MinHeapify(0)
 }
 
-func (h *Heap[T]) Min() Element[T] { return h.array[0] }
+func (h *heap[T]) Min() Element[T] { return h.array[0] }
 
-func (h *Heap[T]) ExtractMin() Element[T] {
+func (h *heap[T]) ExtractMin() Element[T] {
 
 	if h.GetSize() == 0 {
 		return nil
@@ -44,19 +44,19 @@ func (h *Heap[T]) ExtractMin() Element[T] {
 	return min
 }
 
-func (h *Heap[T]) GetSize() int {
+func (h *heap[T]) GetSize() int {
 	return len(h.array)
 }
 
-func (h *Heap[T]) Left(i int) int {
+func (h *heap[T]) Left(i int) int {
 	return 2*i + 1
 }
 
-func (h *Heap[T]) Right(i int) int {
+func (h *heap[T]) Right(i int) int {
 	return 2*i + 2
 }
 
-func (h *Heap[T]) MinHeapify(i int) {
+func (h *heap[T]) MinHeapify(i int) {
 
 	left := h.Left(i)
 	right := h.Right(i)
@@ -81,7 +81,7 @@ func (h *Heap[T]) MinHeapify(i int) {
 
 }
 
-func (h *Heap[T]) BuildMinHeap() {
+func (h *heap[T]) BuildMinHeap() {
 	lastNodeIndx := h.GetSize() - 1
 
 	for i := lastNodeIndx; i >= 0; i-- {
